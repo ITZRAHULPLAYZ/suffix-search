@@ -1,4 +1,4 @@
-﻿# SuffixSearch - Efficient Substring Search via Suffix Arrays
+# SuffixSearch - Efficient Substring Search via Suffix Arrays
 
 <div align="center">
 
@@ -70,13 +70,12 @@ A built-in HTTP server also exposes the search as a web app served from the `web
 
 ## Key Features
 
-- O(n log n) suffix array construction using prefix doubling
-- O(m log n) binary search using lower and upper bounds
-- O(n) LCP array construction using Kasai's algorithm
-- HTTP server using the built-in JDK `com.sun.net.httpserver` package
-- REST endpoint at `/api/search` returning JSON results
-- Web front-end in `web/index.html`
-- Performance benchmarking with heap memory tracking
+- Suffix array construction using prefix doubling in O(n log n) time
+- LCP array built using Kasai's algorithm in O(n) time
+- Pattern search using binary search (lower bound + upper bound) in O(m log n) time
+- Brute-force baseline using String.indexOf for performance comparison
+- Benchmarks across text sizes from 1,000 to 100,000 characters with heap memory tracking
+- Context-aware result display showing surrounding characters for each match
 
 ---
 
