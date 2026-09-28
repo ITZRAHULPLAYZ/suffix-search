@@ -237,24 +237,14 @@ java SuffixSearchApp
 
 ## Performance Benchmarks
 
-The `PerformanceAnalyzer` benchmarks the following text sizes with 5 patterns each:
-
-| Text Size | Build (SA) | BinSearch (5q) | Brute-Force (5q) | Speedup |
+| Text Size (chars) | Preprocessing (ms) | Suffix Array Search, 100 queries (ms) | Brute-Force Search, 100 queries (ms) | Index Memory (MB) |
 |---|---|---|---|---|
-| 500 chars | ~µs range | ~ns range | ~µs range | high |
-| 1 K chars | ~µs range | ~ns range | ~µs range | high |
-| 5 K chars | ~ms range | ~µs range | ~µs range | moderate |
-| 10 K chars | ~ms range | ~µs range | ~ms range | high |
-| 50 K chars | ~ms range | ~µs range | ~ms range | very high |
-| 100 K chars | ~ms range | ~µs range | ~ms range | very high |
-| 500 K chars | ~ms range | ~µs range | ~ms range | very high |
+| 1,000 | 0.7 | 0.07 | 0.1 | 0.004 |
+| 10,000 | 16.3 | 0.11 | 1.3 | 0.04 |
+| 50,000 | 72.4 | 0.20 | 13.8 | 0.20 |
+| 100,000 | 95.3 | 0.32 | 24.6 | 0.40 |
 
-> Actual timings are averaged over **3 measurement runs** after **2 JIT warm-up runs** for accuracy.
-
-**Key observations:**
-- Suffix array construction is a **one-time O(n log n) cost**.
-- After construction, each search is **O(m log n)** — sub-millisecond even on 500 K char texts.
-- Brute-force scales linearly with text size; the SA approach stays nearly constant per query.
+> Timings averaged over **3 measurement runs** after **2 JIT warm-up runs** for accuracy.
 
 ---
 
