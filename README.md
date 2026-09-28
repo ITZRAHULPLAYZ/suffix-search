@@ -198,48 +198,12 @@ Compare suffix at SA[mid] against pattern:
 
 ## Web Interface & REST API
 
-### Starting the Web Server
-
 ```bash
-# Compile all sources
 javac *.java
-
-# Launch the HTTP server (serves on port 8080)
 java Server
 ```
 
-Then open **http://localhost:8080** in your browser.
-
-### REST API Endpoint
-
-**POST** `/api/search`
-
-**Request body (JSON):**
-```json
-{
-  "text": "banana",
-  "pattern": "ana"
-}
-```
-
-**Response (JSON):**
-```json
-{
-  "pattern": "ana",
-  "count": 2,
-  "time": "1.234 µs",
-  "positions": [1, 3]
-}
-```
-
-| Field | Type | Description |
-|---|---|---|
-| `pattern` | `string` | The searched pattern |
-| `count` | `int` | Number of occurrences found |
-| `time` | `string` | Elapsed search time (µs or ms) |
-| `positions` | `int[]` | Sorted list of starting positions (0-indexed) |
-
-> **Note:** The server caches the last-used `SuffixArray`. If the same text is submitted again, the array is reused — only new texts trigger a rebuild.
+Open **http://localhost:8080** in your browser.
 
 ---
 
