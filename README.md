@@ -1,4 +1,4 @@
-# SuffixSearch — Efficient Substring Search via Suffix Arrays
+﻿# SuffixSearch - Efficient Substring Search via Suffix Arrays
 
 <div align="center">
 
@@ -15,15 +15,15 @@
 
 ## Project Information
 
-**Project Title:** SuffixSearch — Efficient Substring Search via Suffix Arrays
+**Project Title:** SuffixSearch - Efficient Substring Search via Suffix Arrays
 
-**Course:** Data Structures and Algorithms – 3 (DSA-3)
+**Course:** Data Structures and Algorithms - 3 (DSA-3)
 
 **Programming Language:** Java (JDK 11+)
 
-**Platform:** Windows / Linux / macOS (any JVM-compatible platform)
+**Platform:** Windows / Linux / macOS
 
-**Academic Year:** 2025 – 2026
+**Academic Year:** 2025 - 2026
 
 ---
 
@@ -48,36 +48,35 @@
 3. [Architecture](#architecture)
 4. [Project Structure](#project-structure)
 5. [Algorithms](#algorithms)
-6. [Web Interface & REST API](#web-interface--rest-api)
+6. [Web Interface](#web-interface)
 7. [Getting Started](#getting-started)
-9. [Performance Benchmarks](#performance-benchmarks)
-10. [Sample Output](#sample-output)
-11. [Complexity Analysis](#complexity-analysis)
+8. [Performance Benchmarks](#performance-benchmarks)
+9. [Sample Output](#sample-output)
+10. [Complexity Analysis](#complexity-analysis)
 
 ---
 
 ## Overview
 
-**SuffixSearch** is a full-stack Java application that demonstrates efficient substring pattern matching using **Suffix Arrays** paired with **binary search**. It provides three distinct usage modes:
+SuffixSearch is a Java application that implements efficient substring pattern matching using Suffix Arrays with binary search. It has three modes:
 
-- **Phase 1 – Demo:** Automatically constructs a suffix array for the classic `"banana"` text and queries several demo patterns.
-- **Phase 2 – Interactive CLI:** Lets the user index any custom text and perform repeated pattern searches from the terminal.
-- **Phase 3 – Performance Benchmark:** Measures and compares suffix-array binary search vs. naive brute-force (`String.indexOf`) across text sizes ranging from **500 to 500,000 characters**.
+- **Demo:** Builds a suffix array on the text "banana" and runs sample queries.
+- **Interactive CLI:** User can enter any text and search patterns interactively.
+- **Benchmark:** Compares suffix array search against brute-force (String.indexOf) across text sizes from 500 to 500,000 characters.
 
-Additionally, a lightweight **HTTP server** exposes the search engine as a REST API, backed by a clean HTML/CSS/JS front-end served from the `web/` directory.
+A built-in HTTP server also exposes the search as a web app served from the `web/` folder.
 
 ---
 
 ## Key Features
 
-- **O(n log n) Suffix Array Construction** — prefix-doubling algorithm, no external libraries.
-- **O(m log n) Binary Search** — lower-bound / upper-bound search over the suffix array.
-- **O(n) LCP Array** — Kasai's algorithm for the Longest Common Prefix array.
-- **Built-in HTTP Server** — powered by `com.sun.net.httpserver.HttpServer` (standard JDK, zero dependencies).
-- **REST API** — POST `/api/search` returns JSON with match count, positions, and elapsed time.
-- **Web Front-end** — responsive single-page UI in `web/index.html`.
-- **Performance Analyzer** — tabular benchmark comparing suffix-array search vs brute-force across multiple text sizes with heap-memory tracking.
-- **Zero External Dependencies** — compiles and runs with a plain JDK; no Maven, no Gradle, no third-party JARs.
+- O(n log n) suffix array construction using prefix doubling
+- O(m log n) binary search using lower and upper bounds
+- O(n) LCP array construction using Kasai's algorithm
+- HTTP server using the built-in JDK `com.sun.net.httpserver` package
+- REST endpoint at `/api/search` returning JSON results
+- Web front-end in `web/index.html`
+- Performance benchmarking with heap memory tracking
 
 ---
 
@@ -101,7 +100,6 @@ Additionally, a lightweight **HTTP server** exposes the search engine as a REST 
 |                             v                                   |
 |                    +------------------+                         |
 |                    |  web/index.html  |                         |
-|                    |  (Front-End UI)  |                         |
 |                    +------------------+                         |
 +------------------------------------------------------------------+
 ```
@@ -113,15 +111,15 @@ Additionally, a lightweight **HTTP server** exposes the search engine as a REST 
 ```
 suffix-search-repo/
 |
-+-- SuffixArray.java          # Core data structure -- O(n log n) build + Kasai LCP
-+-- SearchEngine.java         # Binary search over the suffix array (lower/upper bound)
-+-- SearchResult.java         # Result container with pretty-print & context snippets
-+-- Server.java               # Built-in JDK HTTP server (port 8080) + REST API
-+-- SuffixSearchApp.java      # Main CLI entry point (Phase 1 / 2 / 3)
-+-- PerformanceAnalyzer.java  # Benchmark harness with heap-memory tracking
++-- SuffixArray.java          # Suffix array + LCP array construction
++-- SearchEngine.java         # Binary search over the suffix array
++-- SearchResult.java         # Holds and displays search results
++-- Server.java               # HTTP server on port 8080
++-- SuffixSearchApp.java      # Main entry point (CLI)
++-- PerformanceAnalyzer.java  # Benchmark harness
 |
 +-- web/
-|   +-- index.html            # Single-page web front-end
+|   +-- index.html
 |
 +-- docs/
     +-- DSA-3_Project Abstract Format (1).docx
@@ -132,31 +130,26 @@ suffix-search-repo/
 
 ## Algorithms
 
-### 1. Suffix Array — O(n log n) Prefix Doubling
+### 1. Suffix Array - O(n log n) Prefix Doubling
 
-A **suffix array** is an integer array `SA[]` of size `n` where `SA[i]` stores the starting index of the `i`-th lexicographically smallest suffix of the input text.
-
-**Construction steps:**
+A suffix array is an integer array `SA[]` where `SA[i]` is the starting index of the i-th smallest suffix of the text.
 
 ```
-1. Initialize SA = [0, 1, 2, ..., n-1] and rank[i] = ASCII(text[i])
-2. For gap = 1, 2, 4, ... (doubling):
-     a. Sort SA using (rank[i], rank[i+gap]) as a 2-key comparator
-     b. Re-assign ranks based on the new order
-     c. If all ranks are distinct -> stop early
-3. Return the final SA[]
+1. Initialize SA = [0, 1, ..., n-1], rank[i] = ASCII(text[i])
+2. For gap = 1, 2, 4, ...:
+     a. Sort SA by (rank[i], rank[i+gap])
+     b. Re-rank based on sorted order
+     c. Stop if all ranks are unique
+3. Return SA[]
 ```
 
-**Time Complexity:** O(n log^2 n) with Java's sort; effectively O(n log n) in practice.
-**Space Complexity:** O(n)
+Time: O(n log^2 n) | Space: O(n)
 
 ---
 
-### 2. LCP Array — O(n) Kasai's Algorithm
+### 2. LCP Array - O(n) Kasai's Algorithm
 
-The **LCP array** stores the length of the longest common prefix between consecutive suffixes in sorted order (`LCP[i]` = LCP between `SA[i-1]` and `SA[i]`).
-
-**Kasai's key insight:** If the LCP of suffix starting at `i` is `h`, then the LCP of suffix starting at `i+1` is at least `h-1`.
+Stores the longest common prefix length between consecutive sorted suffixes.
 
 ```
 h = 0
@@ -168,62 +161,51 @@ for i = 0 to n-1:
         if h > 0: h--
 ```
 
-**Time Complexity:** O(n)
+Time: O(n)
 
 ---
 
-### 3. Pattern Search — O(m log n) Binary Search
+### 3. Pattern Search - O(m log n) Binary Search
 
-Once the suffix array is built, searching for a pattern of length `m` in a text of length `n` reduces to two binary searches:
-
-- **Lower Bound** — first index `lo` where `SA[lo]` has a suffix prefixed by the pattern.
-- **Upper Bound** — last index `hi` where `SA[hi]` has a suffix prefixed by the pattern.
-
-All `hi - lo + 1` matches are found in O(m log n) time (each comparison costs O(m)).
+Finds all occurrences of a pattern using two binary searches (lower bound and upper bound) over the suffix array.
 
 ```
-Compare suffix at SA[mid] against pattern:
-  for k = 0 to pattern.length-1:
-      if text[SA[mid]+k] != pattern[k]: return diff
-  return 0  (suffix starts with pattern)
+For each SA[mid], compare suffix against pattern character by character.
+Lower bound -> first match position
+Upper bound -> last match position
 ```
 
 ---
 
-### 4. Brute-Force Baseline — O(n * m)
+### 4. Brute-Force Baseline - O(n * m)
 
-`SearchEngine.bruteForceTime()` uses Java's `String.indexOf` in a loop, providing an O(n*m) baseline for the benchmark comparison.
+Uses `String.indexOf` in a loop. Used only to compare performance against the suffix array approach.
 
 ---
 
-## Web Interface & REST API
+## Web Interface
 
 ```bash
 javac *.java
 java Server
 ```
 
-Open **http://localhost:8080** in your browser.
+Open `http://localhost:8080` in your browser.
 
 ---
 
 ## Getting Started
 
-### Prerequisites
+### Requirements
 
 | Requirement | Version |
 |---|---|
 | Java Development Kit (JDK) | 11 or higher |
 | Operating System | Windows / Linux / macOS |
-| External Libraries | None |
 
-### Compilation
+### Compile
 
 ```bash
-# Navigate to the project root
-cd suffix-search-repo
-
-# Compile all Java source files at once
 javac *.java
 ```
 
@@ -244,22 +226,16 @@ java SuffixSearchApp
 | 50,000 | 72.4 | 0.20 | 13.8 | 0.20 |
 | 100,000 | 95.3 | 0.32 | 24.6 | 0.40 |
 
-
 ---
 
 ## Sample Output
 
 ```
 ╔══════════════════════════════════════════════════════════════════════════╗
-║                                                                          ║
 ║   Efficient Substring Search via Suffix Arrays       v1.0               ║
 ╚══════════════════════════════════════════════════════════════════════════╝
 
-══════════════════════════════════════════════════════════════════
-  PHASE 1 - Suffix Array Demo  (text = "banana")
-══════════════════════════════════════════════════════════════════
-
-Suffix Array:
+Suffix Array (text = "banana"):
 ┌──────────────────────────────────────────────────────────────────┐
 │  Rank   SA[i]     Suffix                                         │
 ├──────────────────────────────────────────────────────────────────┤
@@ -278,8 +254,6 @@ Suffix Array:
 ╠══════════════════════════════════════════════════════════════════╣
 ║  Positions: 1, 3                                                 ║
 ╠══════════════════════════════════════════════════════════════════╣
-║  Pos    Context (…[match]…)                                      ║
-╠══════════════════════════════════════════════════════════════════╣
 ║  1      b[ana]na                                                 ║
 ║  3      ban[ana]                                                 ║
 ╚══════════════════════════════════════════════════════════════════╝
@@ -292,21 +266,19 @@ Suffix Array:
 | Operation | Time Complexity | Space Complexity |
 |---|---|---|
 | Suffix Array build | O(n log^2 n) | O(n) |
-| LCP Array build (Kasai) | O(n) | O(n) |
-| Pattern search | O(m log n) | O(1) extra |
-| Brute-force baseline | O(n * m) | O(1) extra |
-| Benchmark (all sizes) | O(sum of ni log^2 ni) | O(max ni) |
+| LCP Array build | O(n) | O(n) |
+| Pattern search | O(m log n) | O(1) |
+| Brute-force | O(n * m) | O(1) |
 
-Where:
 - `n` = length of the input text
 - `m` = length of the search pattern
-- `ni` = text size at benchmark step `i`
 
+---
 
 <div align="center">
 
-**KL Deemed University · Department of CSE · DSA-3 · Team 24 · 2025–2026**
+**KL Deemed University · Department of CSE · DSA-3 · Team 24 · 2025-2026**
 
-*Submitted under the guidance of **Dr. Swathi***
+*Submitted under the guidance of Dr. Swathi*
 
 </div>
