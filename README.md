@@ -50,7 +50,6 @@
 5. [Algorithms](#algorithms)
 6. [Web Interface & REST API](#web-interface--rest-api)
 7. [Getting Started](#getting-started)
-8. [Running the Application](#running-the-application)
 9. [Performance Benchmarks](#performance-benchmarks)
 10. [Sample Output](#sample-output)
 11. [Complexity Analysis](#complexity-analysis)
@@ -264,30 +263,11 @@ cd suffix-search-repo
 javac *.java
 ```
 
----
-
-## Running the Application
-
-### Mode 1 — CLI Application (Phase 1 + 2 + 3)
+### Run
 
 ```bash
 java SuffixSearchApp
 ```
-
-This runs all three phases sequentially:
-- **Phase 1** — Automatic demo on `"banana"`
-- **Phase 2** — Interactive search (you type text + patterns)
-- **Phase 3** — Performance benchmark across 7 text sizes
-
-### Mode 2 — HTTP Server + Web UI
-
-```bash
-java Server
-```
-
-- Server starts on `http://localhost:8080`
-- Static files served from `web/`
-- REST API available at `/api/search`
 
 ---
 
