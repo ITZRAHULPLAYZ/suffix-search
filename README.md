@@ -244,7 +244,6 @@ java SuffixSearchApp
 | 50,000 | 72.4 | 0.20 | 13.8 | 0.20 |
 | 100,000 | 95.3 | 0.32 | 24.6 | 0.40 |
 
-> Timings averaged over **3 measurement runs** after **2 JIT warm-up runs** for accuracy.
 
 ---
 
