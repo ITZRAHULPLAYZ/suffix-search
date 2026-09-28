@@ -1,4 +1,4 @@
-﻿# SuffixSearch — Efficient Substring Search via Suffix Arrays
+# SuffixSearch — Efficient Substring Search via Suffix Arrays
 
 <div align="center">
 
@@ -54,7 +54,6 @@
 9. [Performance Benchmarks](#performance-benchmarks)
 10. [Sample Output](#sample-output)
 11. [Complexity Analysis](#complexity-analysis)
-12. [API Reference](#api-reference)
 
 ---
 
@@ -370,50 +369,6 @@ Where:
 - `m` = length of the search pattern
 - `ni` = text size at benchmark step `i`
 
----
-
-## API Reference
-
-### `SuffixArray`
-
-| Method | Return | Description |
-|---|---|---|
-| `SuffixArray(String text)` | — | Constructs SA + rank + LCP arrays |
-| `getSA()` | `int[]` | Returns a copy of the suffix array |
-| `getLCP()` | `int[]` | Returns a copy of the LCP array |
-| `getText()` | `String` | Returns the indexed text |
-| `length()` | `int` | Returns `n` (text length) |
-| `printSuffixArray(int maxLen)` | `void` | Pretty-prints the SA table |
-| `printLCPArray(int limit)` | `void` | Pretty-prints the LCP table |
-
-### `SearchEngine`
-
-| Method | Return | Description |
-|---|---|---|
-| `SearchEngine(SuffixArray sa)` | — | Wraps a built suffix array |
-| `search(String pattern)` | `SearchResult` | Binary search; returns all matches |
-| `bruteForceTime(String pattern)` | `long` | Naive indexOf; returns elapsed ns |
-
-### `SearchResult`
-
-| Method | Return | Description |
-|---|---|---|
-| `getPattern()` | `String` | The queried pattern |
-| `getPositions()` | `List<Integer>` | Sorted list of match positions |
-| `getCount()` | `int` | Number of matches |
-| `isFound()` | `boolean` | True if at least one match |
-| `getElapsedNs()` | `long` | Raw elapsed nanoseconds |
-| `getElapsedFormatted()` | `String` | Human-readable time (µs / ms) |
-| `print(int maxOccurrences)` | `void` | Pretty-prints the result with context |
-
-### `Server`
-
-| Endpoint | Method | Description |
-|---|---|---|
-| `/` | GET | Serves `web/index.html` |
-| `/api/search` | POST | Performs a search; returns JSON |
-
----
 
 <div align="center">
 
