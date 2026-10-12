@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Suffix Search</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+        
+        body {
+            margin: 0;
+            padding: 40px 20px;
+            font-family: 'Inter', sans-serif;
+            background-color: #000000;
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .hero-title {
+            font-size: clamp(3rem, 10vw, 6rem);
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: -0.05em;
+            margin: 0 0 40px 0;
+            text-align: center;
+            line-height: 1;
+            color: #ffffff;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        label {
+            font-size: 18px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        textarea, input {
+            width: 100%;
+            padding: 16px;
+            background: #000000;
+            border: 1px solid #ffffff;
+            color: #ffffff;
+            font-family: inherit;
+            font-size: 16px;
+            box-sizing: border-box;
+            border-radius: 0;
+            transition: all 0.2s;
+        }
+
+        textarea:focus, input:focus {
+            outline: none;
+            background: #222222;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 150px;
+        }
+
+        button {
+            width: 100%;
+            padding: 20px;
+            background: #ffffff;
+            color: #000000;
+            border: none;
+            font-weight: 900;
+            font-size: 20px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        button:hover {
+            background: #e0e0e0;
+        }
+        
+        button:active {
+            transform: scale(0.98);
+        }
+
+        #output {
+            margin-top: 16px;
+            padding: 20px;
+            background: #000000;
+            border: 1px dashed #ffffff;
+            min-height: 80px;
+            white-space: pre-wrap;
+            font-size: 16px;
+            font-family: monospace;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <h1 class="hero-title">Suffix Search</h1>
+    
+    <div class="container">
+        <div class="input-group">
+            <label for="text">Text to Index</label>
+            <textarea id="text" placeholder="Enter text here..."></textarea>
+        </div>
+        
+        <div class="input-group">
+            <label for="pattern">Search Pattern</label>
+            <input type="text" id="pattern" placeholder="Enter pattern to search...">
+        </div>
+        
+        <button onclick="performSearch()">Execute Search</button>
+        
+        <div id="output">System ready. Awaiting input...</div>
+    </div>
+
+    <script>
+        class SuffixArray {
+            constructor(text) {
+                this.text = text;
+                this.n = text.length;
+                this.sa = this.buildSA();
+            }
+
+            buildSA() {
+                const n = this.n;
+                let sa = Array.from({ length: n }, (_, i) => i);
+                let rank = new Int32Array(n);
+                let tmp = new Int32Array(n);
+
+                for (let i = 0; i < n; i++) rank[i] = this.text.charCodeAt(i);
+
+                for (let gap = 1; gap < n; gap <<= 1) {
+                    const rk = new Int32Array(rank);
+                    const g = gap;
+
+                    sa.sort((a, b) => {
+                        if (rk[a] !== rk[b]) return rk[a] - rk[b];
+                        const ra = (a + g < n) ? rk[a + g] : -1;
+                        const rb = (b + g < n) ? rk[b + g] : -1;
+                        return ra - rb;
+                    });
+
+                    tmp[sa[0]] = 0;
+                    for (let i = 1; i < n; i++) {
+                        tmp[sa[i]] = tmp[sa[i - 1]];
+                        let same = (rk[sa[i]] === rk[sa[i - 1]]);
+                        if (same) {
+                            const ai = sa[i] + g < n ? rk[sa[i] + g] : -1;
+                            const bi = sa[i - 1] + g < n ? rk[sa[i - 1] + g] : -1;
+                            same = (ai === bi);
+                        }
+                        if (!same) tmp[sa[i]]++;
+                    }
+                    rank.set(tmp);
+                    if (rank[sa[n - 1]] === n - 1) break;
+                }
+                return sa;
+            }
+        }
+
+        class SearchEngine {
+            constructor(suffixArray) {
+                this.text = suffixArray.text;
+                this.sa = suffixArray.sa;
+                this.n = suffixArray.n;
+            }
+
+            search(pattern) {
+                const t0 = performance.now();
+                const lo = this.lowerBound(pattern);
+                const hi = this.upperBound(pattern);
+                const elapsedUs = (performance.now() - t0) * 1000;
+
+                const positions = [];
+                if (lo <= hi) {
+                    for (let i = lo; i <= hi; i++) positions.push(this.sa[i]);
+                    positions.sort((a, b) => a - b);
+                }
+
+                let timeFormatted = elapsedUs < 1000
+                    ? `${elapsedUs.toFixed(3)} µs`
+                    : `${(elapsedUs / 1000).toFixed(3)} ms`;
+
+                return {
+                    pattern,
+                    positions,
+                    time: timeFormatted,
+                    count: positions.length
+                };
+            }
+
+            lowerBound(pattern) {
+                let lo = 0, hi = this.n;
+                while (lo < hi) {
+                    const mid = (lo + hi) >>> 1;
+                    if (this.compareSuffix(this.sa[mid], pattern) < 0) lo = mid + 1;
+                    else hi = mid;
+                }
+                return lo;
+            }
+
+            upperBound(pattern) {
+                let lo = 0, hi = this.n;
+                while (lo < hi) {
+                    const mid = (lo + hi) >>> 1;
+                    if (this.compareSuffix(this.sa[mid], pattern) <= 0) lo = mid + 1;
+                    else hi = mid;
+                }
+                return lo - 1;
+            }
+
+            compareSuffix(saPos, pattern) {
+                const pLen = pattern.length;
+                for (let k = 0; k < pLen; k++) {
+                    if (saPos + k >= this.n) return -1;
+                    const cText = this.text.charCodeAt(saPos + k);
+                    const cPat = pattern.charCodeAt(k);
+                    if (cText !== cPat) return cText - cPat;
+                }
+                return 0;
+            }
+        }
+
+        let cachedText = "";
+        let cachedSA = null;
+        let cachedEngine = null;
+
+        async function performSearch() {
+            const text = document.getElementById('text').value;
+            const pattern = document.getElementById('pattern').value;
+            const output = document.getElementById('output');
+
+            if (!text || !pattern) {
+                output.innerText = 'ERROR: Text and Pattern required.';
+                return;
+            }
+
+            output.innerText = 'PROCESSING...';
+
+            // Attempt backend API first; fallback to client-side Suffix Array automatically (Vercel / Static)
+            try {
+                const response = await fetch('/api/search', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text, pattern })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    renderResult(data.count, data.positions, data.time);
+                    return;
+                }
+            } catch (ignored) {
+                // Backend not present (e.g. static hosting on Vercel) -> execute via client-side SuffixArray
+            }
+
+            try {
+                if (cachedText !== text || !cachedSA) {
+                    cachedSA = new SuffixArray(text);
+                    cachedEngine = new SearchEngine(cachedSA);
+                    cachedText = text;
+                }
+                const result = cachedEngine.search(pattern);
+                renderResult(result.count, result.positions, result.time);
+            } catch (err) {
+                output.innerText = `FATAL ERROR: ${err.message}`;
+            }
+        }
+
+        function renderResult(count, positions, time) {
+            const output = document.getElementById('output');
+            if (count === 0) {
+                output.innerHTML = `STATUS: NOT FOUND\nTIME: ${time}`;
+            } else {
+                output.innerHTML = `STATUS: MATCH FOUND\nCOUNT: ${count}\nPOSITIONS: [${positions.join(', ')}]\nTIME: ${time}`;
+            }
+        }
+    </script>
+</body>
+</html>
