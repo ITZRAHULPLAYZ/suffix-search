@@ -103,19 +103,11 @@ public class Server {
 
         private Map<String, String> parseJson(String json) {
             Map<String, String> map = new HashMap<>();
-            json = json.trim();
-            if (json.startsWith("{") && json.endsWith("}")) {
-                json = json.substring(1, json.length() - 1);
-                String[] pairs = json.split("\",\"");
-                for (String pair : pairs) {
-                    String[] kv = pair.split("\":\"");
-                    if (kv.length == 2) {
-                        String key = kv[0].replaceAll("\"", "").trim();
-                        String value = kv[1].replaceAll("\"", "").trim();
-                        value = value.replace("\\n", "\n").replace("\\r", "");
-                        map.put(key, value);
-                    }
-                }
+            java.util.regex.Matcher m = java.util.regex.Pattern.compile("\"([^\"]+)\"\\s*:\\s*\"((?:\\\\\"|[^\"])*)\"").matcher(json);
+            while (m.find()) {
+                String key = m.group(1).trim();
+                String value = m.group(2).replace("\\n", "\n").replace("\\r", "").replace("\\\"", "\"");
+                map.put(key, value);
             }
             return map;
         }
